@@ -39,6 +39,11 @@ app.config["MAX_CONTENT_LENGTH"] = 500 * 1024 * 1024  # 500mb
 app.config["UPLOAD_FOLDER"] = "temp_uploads"
 app.config["RESULTS_FOLDER"] = "results"
 
+print("[INFO] Human Distance Monitoring System Server...")
+print(
+    f"[INFO] Default: MIN_DISTANCE={DEFAULT_MIN_DISTANCE}, MIN_CONF={DEFAULT_MIN_CONF}, NMS_THRESH={DEFAULT_NMS_THRESH}"
+)
+
 # Ensure directories exist
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(app.config["RESULTS_FOLDER"], exist_ok=True)
@@ -689,9 +694,6 @@ def clean_all():
 
 
 if __name__ == "__main__":
-    print("[INFO] Human Distance Monitoring System Server...")
-    print(
-        f"[INFO] Default: MIN_DISTANCE={DEFAULT_MIN_DISTANCE}, MIN_CONF={DEFAULT_MIN_CONF}, NMS_THRESH={DEFAULT_NMS_THRESH}"
-    )
-    cleanup_folders()
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    # cleanup_folders()
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
