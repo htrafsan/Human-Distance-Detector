@@ -114,7 +114,7 @@ def setup_yolo():
     if not os.path.isfile(coco_cfg):
         print("[-] yolov3.cfg not found. Downloading..")
         try:
-            urlretrieve(f"{base_link}/yolov3.cfg", coco_cfg)
+            urlretrieve(f"{base_link}/yolov3.cfg", coco_cfg) # yolov3-tiny.cfg
         except Exception as e:
             print(f"[ERROR] Failed to download yolov3.cfg: {e}")
             return None, None, None
@@ -123,7 +123,7 @@ def setup_yolo():
     if not os.path.isfile(coco_weights):
         print("[-] yolov3.weights not found. Downloading..")
         try:
-            urlretrieve(f"{base_link}/yolov3.weights", coco_weights)
+            urlretrieve(f"{base_link}/yolov3.weights", coco_weights) # yolov3-tiny.cfg
         except Exception as e:
             print(f"[ERROR] Failed to download yolov3.weights: {e}")
             return None, None, None
