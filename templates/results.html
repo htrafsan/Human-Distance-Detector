@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Results Comparison</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    h1 {
+      font-size: 25px;
+    }
+
+    h3 {
+      text-align: center;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      text-align: center;
+      border-bottom: 2px solid #007b77;
+    }
+
+    .progress-container {
+      margin: 20px 0;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background-color: #f0f0f0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: #007b77;
+      transition: width 0.3s ease;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .metric-card,
+    .count-card {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #007b77;
+      text-align: center;
+    }
+
+    .metric-card h4,
+    .count-card h4 {
+      margin: 0 0 10px 0;
+      color: #333;
+    }
+
+    .metric-card p,
+    .count-card p {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 0;
+      color: #007b77;
+    }
+
+    .metric-card small,
+    .count-card small {
+      color: #666;
+      font-size: 12px;
+    }
+
+    .download-links {
+      display: block;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .download-btn {
+      background: #007b77;
+      color: white;
+      padding: 10px 15px;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+
+    .download-btn:hover {
+      background: #0056bc;
+    }
+
+    .back-btn {
+      display: inline-block;
+      background: #6c757d;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+
+    .back-btn:hover {
+      background: #545b62;
+    }
+
+    .plot-section img {
+      max-width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    .error-section {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 20px;
+      border-radius: 5px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Comparison Results</h1>
+      <p>Job ID: <strong id="jobId">{{ job_id }}</strong></p>
+    </div>
+
+    <!-- Processing Status -->
+    <div id="processingSection">
+      <h2>Processing Status</h2>
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <p id="progressText">Initializing...</p>
+        <div id="currentTask"></div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="hidden" id="resultsSection">
+      <!-- Comparison Plot -->
+      <div class="plot-section">
+        <h3>Performance Comparison</h3>
+        <div id="comparisonPlot"></div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="summary-section">
+        <h3>Detection Metrics</h3>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <h4>Precision</h4>
+            <p id="precisionValue">-</p>
+          </div>
+          <div class="metric-card">
+            <h4>Recall</h4>
+            <p id="recallValue">-</p>
+          </div>
+          <div class="metric-card">
+            <h4>F1 Score</h4>
+            <p id="f1Value">-</p>
+          </div>
+          <div class="metric-card">
+            <h4>Accuracy</h4>
+            <p id="accuracyValue">-</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detection Counts -->
+      <div class="counts-section">
+        <h3>Detection Counts</h3>
+        <div class="metrics-grid">
+          <div class="count-card">
+            <h4>True Positives</h4>
+            <p id="tpCount">-</p>
+          </div>
+          <div class="count-card">
+            <h4>True Negatives</h4>
+            <p id="tnCount">-</p>
+          </div>
+          <div class="count-card">
+            <h4>False Positives</h4>
+            <p id="fpCount">-</p>
+          </div>
+          <div class="count-card">
+            <h4>False Negatives</h4>
+            <p id="fnCount">-</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Download Links -->
+      <div class="download-section">
+        <h3>Download Results</h3>
+        <div class="download-links">
+          <a href="#" id="downloadPlot" class="download-btn">Comparison Plot</a>
+          <a href="#" id="downloadColorVideo" class="download-btn">Colored Video</a>
+          <a href="#" id="downloadBWVideo" class="download-btn">BW Video</a>
+          <a href="#" id="downloadColorCSV" class="download-btn">Color CSV</a>
+          <a href="#" id="downloadBWCSV" class="download-btn">BW CSV</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="error-section hidden" id="errorSection">
+      <h2>Processing Error</h2>
+      <p id="errorMessage"></p>
+      <a href="/" class="back-btn">Try Again</a>
+    </div>
+
+    <div style="text-align: center; margin-top: 25px;">
+      <a href="/" class="back-btn">Compare Another Video Pair</a>
+    </div>
+  </div>
+
+  <script>
+    const jobId = "{{ job_id }}";
+
+    function pollStatus() {
+      fetch('/status/' + jobId)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network not ok');
+          }
+          return response.json();
+        })
+        .then(status => {
+          console.log('Status update:', status);
+          updateProgress(status);
+
+          if (status.status === 'processing' || status.status === 'uploaded') {
+            setTimeout(pollStatus, 1000);
+          } else if (status.status === 'completed') {
+            setTimeout(() => {
+              loadResults();
+            }, 1000);
+          } else if (status.status === 'error') {
+            showError(status.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error polling status:', error);
+          setTimeout(pollStatus, 2000);
+        });
+    }
+
+    function updateProgress(status) {
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+      const currentTask = document.getElementById('currentTask');
+
+      const progress = status.progress || 0;
+      progressFill.style.width = progress + '%';
+
+      if (status.status === 'processing') {
+        progressText.textContent = 'Processing... ' + progress + '%';
+        if (status.current_task) {
+          currentTask.textContent = status.current_task;
+        }
+      } else if (status.status === 'uploaded') {
+        progressText.textContent = 'Starting processing...';
+      }
+    }
+
+    function loadResults() {
+      fetch('/status/' + jobId)
+        .then(response => response.json())
+        .then(status => {
+          if (status.status === 'completed' && status.metrics) {
+            showResults(status.metrics, status);
+          } else {
+            showError('Results not available yet');
+          }
+        })
+        .catch(error => {
+          showError('Error loading results: ' + error.message);
+        });
+    }
+
+    function showResults(metrics, status) {
+      document.getElementById('processingSection').classList.add('hidden');
+      document.getElementById('resultsSection').classList.remove('hidden');
+
+      // Update metrics
+      document.getElementById('precisionValue').textContent = metrics.precision;
+      document.getElementById('recallValue').textContent = metrics.recall;
+      document.getElementById('f1Value').textContent = metrics.f1_score;
+      document.getElementById('accuracyValue').textContent = metrics.accuracy;
+
+      // Update counts
+      document.getElementById('tpCount').textContent = metrics.tp_total;
+      document.getElementById('tnCount').textContent = metrics.tn_total;
+      document.getElementById('fpCount').textContent = metrics.fp_total;
+      document.getElementById('fnCount').textContent = metrics.fn_total;
+
+      // Load comparison plot
+      if (status.comparison_plot) {
+        const plotContainer = document.getElementById('comparisonPlot');
+        const plotPath = status.comparison_plot.replace('\\', '/');
+        plotContainer.innerHTML = '<img src="/download/' + btoa(plotPath) + '" alt="Comparison Plot">';
+        document.getElementById('downloadPlot').href = '/download/' + btoa(plotPath);
+      }
+
+      // Setup video download links
+      if (status.color_output_video) {
+        document.getElementById('downloadColorVideo').href = '/download/' + btoa(status.color_output_video);
+      }
+      if (status.bw_output_video) {
+        document.getElementById('downloadBWVideo').href = '/download/' + btoa(status.bw_output_video);
+      }
+
+      // Setup CSV download links
+      if (status.color_output_csv) {
+        document.getElementById('downloadColorCSV').href = '/download/' + btoa(status.color_output_csv);
+      }
+      if (status.bw_output_csv) {
+        document.getElementById('downloadBWCSV').href = '/download/' + btoa(status.bw_output_csv);
+      }
+    }
+
+    function showError(message) {
+      document.getElementById('processingSection').classList.add('hidden');
+      document.getElementById('errorSection').classList.remove('hidden');
+      document.getElementById('errorMessage').textContent = message;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      pollStatus();
+    });
+  </script>
+</body>
+
+</html>
